@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punya Nagari - Smart News Editorial Dashboard</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Mukta:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', 'Mukta', sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Top Header */
+        header {
+            background-color: #1e293b;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #334155;
+        }
+
+        header h1 {
+            font-size: 20px;
+            color: #ef4444;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge {
+            background-color: #22c55e;
+            color: #052e16;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Dashboard Main Layout (CSS Grid) */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            gap: 15px;
+            padding: 15px;
+            flex-grow: 1;
+            height: calc(100vh - 65px);
+        }
+
+        .panel {
+            background-color: #1e293b;
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #334155;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #38bdf8;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 8px;
+        }
+
+        /* Left Panel: News Feeds */
+        .feed-card {
+            background-color: #0f172a;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            border-left: 4px solid #38bdf8;
+            transition: 0.2s ease;
+        }
+
+        .feed-card:hover {
+            background-color: #1e293b;
+        }
+
+        .feed-card h4 {
+            font-size: 14px;
+            color: #f1f5f9;
+            margin-bottom: 5px;
+        }
+
+        .feed-card p {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        /* Center Panel: Editor */
+        .editor-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            height: 100%;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            background-color: #0f172a;
+            border: 1px solid #334155;
+            color: #fff;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        textarea {
+            resize: none;
+            flex-grow: 1;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+
+        .btn-check { background-color: #38bdf8; color: #0f172a; }
+        .btn-check:hover { background-color: #0284c7; color: #fff; }
+
+        .btn-print { background-color: #ef4444; color: #fff; }
+        .btn-print:hover { background-color: #dc2626; }
+
+        /* Right Panel: AI & Layout Controls */
+        .fact-box {
+            background-color: #0f172a;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .score-indicator {
+            font-size: 22px;
+            font-weight: 700;
+            color: #22c55e;
+            margin-top: 5px;
+        }
+
+        /* Dynamic Page Grid Simulation */
+        .page-preview-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 100px 100px;
+            gap: 8px;
+            background-color: #0f172a;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px dashed #475569;
+        }
+
+        .grid-block {
+            background-color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #cbd5e1;
+            border-radius: 4px;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .ad-block {
+            background-color: #b45309;
+            color: #fef3c7;
+            font-weight: 600;
+        }
+
+        .layout-toggle-btn {
+            background-color: #475569;
+            color: #fff;
+            margin-top: 10px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <h1>PUNYA NAGARI - EDITORIAL DASHBOARD v2.0</h1>
+        <div>
+            <span class="status-badge" id="sync-status">🟢 System Online (Local Sync Active)</span>
+        </div>
+    </header>
+
+    <!-- Main Content Layout -->
+    <div class="dashboard-container">
+
+        <!-- LEFT PANEL: Incoming News Feeds -->
+        <div class="panel">
+            <div class="panel-title">📥 Incoming Feeds (API/Reporters)</div>
+            
+            <div class="feed-card" onclick="loadFeed('Pimpri Metro Successful Trial Run Today', 'Pimpri-Chinchwad city today completed its high-speed metro track test trial successfully under PCMC observation...')">
+                <h4>Pimpri Metro Successful Trial</h4>
+                <p>10 mins ago • Reporter Feed</p>
+            </div>
+
+            <div class="feed-card" onclick="loadFeed('Traffic Diverted at Chinchwad Flyover', 'Due to road extension work, traffic will be diverted near Chinchwad bridge from 10 PM onwards...')">
+                <h4>Traffic Alert: Chinchwad Bridge</h4>
+                <p>25 mins ago • Agency Wire</p>
+            </div>
+
+            <div class="feed-card" onclick="loadFeed('Heavy Rain Alert Issued for Pune District', 'The Meteorological department issued an alert predicting rainfall in western Maharashtra...')">
+                <h4>Pune Weather Update</h4>
+                <p>1 hour ago • Weather API</p>
+            </div>
+        </div>
+
+        <!-- CENTER PANEL: Sub-Editor Workstation -->
+        <div class="panel">
+            <div class="panel-title">📝 Editor Desk & Copy Refinement</div>
+            <div class="editor-form">
+                <input type="text" id="news-headline" placeholder="Enter Headline here...">
+                <textarea id="news-body" placeholder="Write or edit full news body in Marathi/English..."></textarea>
+                
+                <div class="btn-group">
+                    <button class="btn-check" onclick="runFactCheckAPI()">🔍 Run AI Fact-Check API</button>
+                    <button class="btn-print" onclick="sendToPrint()">🚀 Send To Print Grid</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: AI Verification & Dynamic Grid -->
+        <div class="panel">
+            <div class="panel-title">🤖 AI Fact-Check & Layout</div>
+            
+            <!-- Fact Check Status -->
+            <div class="fact-box">
+                <span style="font-size: 12px; color: #94a3b8;">Credibility Index Score:</span>
+                <div class="score-indicator" id="credibility-score">98% (High)</div>
+                <p id="fact-status-msg" style="font-size: 11px; color: #cbd5e1; margin-top: 5px;">
+                    ✅ Reverse image check passed. Source verified.
+                </p>
+            </div>
+
+            <div class="panel-title" style="margin-top: 10px;">📰 Dynamic Print Page Layout</div>
+            <p style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">Auto-adjusting Grid (CSS Grid & Ad space handler)</p>
+
+            <!-- Page Grid Preview -->
+            <div class="page-preview-grid" id="page-grid">
+                <div class="grid-block" id="grid-news-1">News Article 1</div>
+                <div class="grid-block" id="grid-news-2">News Article 2</div>
+                <div class="grid-block ad-block" id="grid-ad">Ad Space (30%)</div>
+                <div class="grid-block" id="grid-news-3">News Article 3</div>
+            </div>
+
+            <button class="layout-toggle-btn" onclick="toggleAdSpace()">⚡ Toggle Last-Minute Ad Change</button>
+        </div>
+
+    </div>
+
+    <!-- JavaScript Core Logic -->
+    <script>
+        // 1. Auto-Save Draft in Browser LocalStorage
+        const headlineInput = document.getElementById('news-headline');
+        const bodyInput = document.getElementById('news-body');
+
+        // Restore saved draft on load
+        window.onload = () => {
+            if (localStorage.getItem('draft_headline')) {
+                headlineInput.value = localStorage.getItem('draft_headline');
+            }
+            if (localStorage.getItem('draft_body')) {
+                bodyInput.value = localStorage.getItem('draft_body');
+            }
+        };
+
+        // Save automatically as user types
+        headlineInput.addEventListener('input', () => {
+            localStorage.setItem('draft_headline', headlineInput.value);
+        });
+
+        bodyInput.addEventListener('input', () => {
+            localStorage.setItem('draft_body', bodyInput.value);
+        });
+
+        // 2. Load Feed into Editor
+        function loadFeed(title, text) {
+            headlineInput.value = title;
+            bodyInput.value = text;
+            localStorage.setItem('draft_headline', title);
+            localStorage.setItem('draft_body', text);
+        }
+
+        // 3. Simulate Fact-Checking REST API Call
+        function runFactCheckAPI() {
+            const scoreElement = document.getElementById('credibility-score');
+            const msgElement = document.getElementById('fact-status-msg');
+
+            scoreElement.style.color = '#eab308';
+            scoreElement.innerText = "Analyzing Feed...";
+            msgElement.innerText = "Connecting to Fact-Check API engine...";
+
+            // Simulate Asynchronous API Response (Fetch/Async Simulation)
+            setTimeout(() => {
+                scoreElement.style.color = '#22c55e';
+                scoreElement.innerText = "96% (Verified)";
+                msgElement.innerText = "✅ Source authenticated via news registry & reverse search.";
+            }, 1200);
+        }
+
+        // 4. Dynamic CSS Grid Layout Handler for Last-Minute Ads
+        let isAdExpanded = false;
+        function toggleAdSpace() {
+            const grid = document.getElementById('page-grid');
+            const adBlock = document.getElementById('grid-ad');
+
+            if (!isAdExpanded) {
+                // Expand Ad Space & Reflow Text Areas
+                grid.style.gridTemplateColumns = "1fr 2fr";
+                adBlock.style.backgroundColor = "#dc2626";
+                adBlock.innerText = "Large Ad Block (50%)";
+                isAdExpanded = true;
+            } else {
+                // Reset Layout
+                grid.style.gridTemplateColumns = "1fr 1fr";
+                adBlock.style.backgroundColor = "#b45309";
+                adBlock.innerText = "Ad Space (30%)";
+                isAdExpanded = false;
+            }
+        }
+
+        // 5. Send to Print Action
+        function sendToPrint() {
+            if(!headlineInput.value) {
+                alert("Please enter a headline first!");
+                return;
+            }
+            alert("🚀 Article '" + headlineInput.value + "' verified and sent to final Print Layout Grid!");
+        }
+    </script>
+</body>
+</html>

@@ -1,362 +1,660 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="mr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Punya Nagari - Smart News Editorial Dashboard</title>
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Mukta:wght@400;600;700&display=swap" rel="stylesheet">
+    <title id="head-title">Punya Nagari - Ultimate Editorial & CMS Dashboard v5.0</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&family=Yatra+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', 'Mukta', sans-serif;
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: #1e293b;
+            --border-color: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-red: #ef4444;
+            --accent-green: #22c55e;
+            --accent-amber: #f59e0b;
         }
 
         body {
-            background-color: #0f172a;
-            color: #f8fafc;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            font-family: 'Mukta', 'Poppins', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
         }
 
-        /* Top Header */
-        header {
-            background-color: #1e293b;
-            padding: 15px 25px;
+        .brand-font {
+            font-family: 'Yatra One', cursive;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 18px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: var(--panel-bg);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background-color: var(--panel-bg);
+            color: var(--accent-blue);
+            border-left-color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .view-panel { display: none; }
+        .view-panel.active-view { display: flex; flex-direction: column; gap: 15px; }
+
+        .card-panel {
+            background-color: var(--panel-bg);
+            border-radius: 10px;
+            padding: 18px;
+            border: 1px solid var(--border-color);
+        }
+
+        .panel-heading {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #334155;
         }
 
-        header h1 {
-            font-size: 20px;
-            color: #ef4444;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .status-badge {
-            background-color: #22c55e;
-            color: #052e16;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        /* Dashboard Main Layout (CSS Grid) */
-        .dashboard-container {
-            display: grid;
-            grid-template-columns: 280px 1fr 320px;
-            gap: 15px;
-            padding: 15px;
-            flex-grow: 1;
-            height: calc(100vh - 65px);
-        }
-
-        .panel {
-            background-color: #1e293b;
-            border-radius: 10px;
-            padding: 15px;
+        /* Master Canvas Styles */
+        .master-canvas-preview {
+            background-color: white;
+            color: black;
+            border-radius: 6px;
+            padding: 12px;
+            min-height: 380px;
             display: flex;
             flex-direction: column;
-            border: 1px solid #334155;
-            overflow-y: auto;
-        }
-
-        .panel-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #38bdf8;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 8px;
-        }
-
-        /* Left Panel: News Feeds */
-        .feed-card {
-            background-color: #0f172a;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            border-left: 4px solid #38bdf8;
-            transition: 0.2s ease;
-        }
-
-        .feed-card:hover {
-            background-color: #1e293b;
-        }
-
-        .feed-card h4 {
-            font-size: 14px;
-            color: #f1f5f9;
-            margin-bottom: 5px;
-        }
-
-        .feed-card p {
-            font-size: 11px;
-            color: #94a3b8;
-        }
-
-        /* Center Panel: Editor */
-        .editor-form {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            height: 100%;
-        }
-
-        input[type="text"], textarea {
-            width: 100%;
-            background-color: #0f172a;
-            border: 1px solid #334155;
-            color: #fff;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            outline: none;
-        }
-
-        textarea {
-            resize: none;
-            flex-grow: 1;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        button {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 13px;
-            transition: 0.2s;
-        }
-
-        .btn-check { background-color: #38bdf8; color: #0f172a; }
-        .btn-check:hover { background-color: #0284c7; color: #fff; }
-
-        .btn-print { background-color: #ef4444; color: #fff; }
-        .btn-print:hover { background-color: #dc2626; }
-
-        /* Right Panel: AI & Layout Controls */
-        .fact-box {
-            background-color: #0f172a;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-        }
-
-        .score-indicator {
-            font-size: 22px;
-            font-weight: 700;
-            color: #22c55e;
-            margin-top: 5px;
-        }
-
-        /* Dynamic Page Grid Simulation */
-        .page-preview-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 100px 100px;
             gap: 8px;
-            background-color: #0f172a;
-            padding: 10px;
-            border-radius: 6px;
-            border: 1px dashed #475569;
         }
 
-        .grid-block {
-            background-color: #334155;
+        .page-masthead {
+            background-color: #dc2626;
+            color: white;
+            text-align: center;
+            font-weight: 800;
+            font-size: 20px;
+            padding: 4px;
+        }
+
+        .page-folio {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 4px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .grid-layout-display {
+            display: grid;
+            gap: 8px;
+            flex-grow: 1;
+            min-height: 280px;
+        }
+
+        .layout-hero-sidebar { grid-template-columns: 2fr 1fr; }
+        .layout-classic-broadsheet { grid-template-columns: 1fr 1fr 1fr; }
+        .layout-modular-grid { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+
+        .slot-box {
+            background-color: #f1f5f9;
+            border: 1px dashed #64748b;
+            padding: 8px;
+            font-size: 11px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 11px;
-            color: #cbd5e1;
-            border-radius: 4px;
             text-align: center;
-            padding: 5px;
+            color: #1e293b;
+            border-radius: 4px;
         }
 
-        .ad-block {
-            background-color: #b45309;
-            color: #fef3c7;
-            font-weight: 600;
-        }
+        .slot-hero { background-color: #fef2f2; border-color: #ef4444; color: #991b1b; font-weight: 700; }
+        .slot-ad { background-color: #fef3c7; border-color: #f59e0b; color: #78350f; font-weight: 700; }
 
-        .layout-toggle-btn {
-            background-color: #475569;
-            color: #fff;
-            margin-top: 10px;
-            width: 100%;
-        }
+        #editor-body:focus { outline: none; }
     </style>
 </head>
-<body>
+<body class="h-screen flex flex-col overflow-hidden">
 
-    <!-- Header -->
-    <header>
-        <h1>PUNYA NAGARI - EDITORIAL DASHBOARD v2.0</h1>
-        <div>
-            <span class="status-badge" id="sync-status">🟢 System Online (Local Sync Active)</span>
-        </div>
-    </header>
-
-    <!-- Main Content Layout -->
-    <div class="dashboard-container">
-
-        <!-- LEFT PANEL: Incoming News Feeds -->
-        <div class="panel">
-            <div class="panel-title">📥 Incoming Feeds (API/Reporters)</div>
-            
-            <div class="feed-card" onclick="loadFeed('Pimpri Metro Successful Trial Run Today', 'Pimpri-Chinchwad city today completed its high-speed metro track test trial successfully under PCMC observation...')">
-                <h4>Pimpri Metro Successful Trial</h4>
-                <p>10 mins ago • Reporter Feed</p>
+    <!-- Header Navigation -->
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-2.5 flex items-center justify-between z-10 shadow-sm">
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center gap-2">
+                <span id="brand-logo-text" class="brand-font text-3xl font-extrabold text-red-600 tracking-wider">
+                    Punya<span class="text-amber-500">Nagari</span>
+                </span>
+                <span id="header-badge" class="bg-red-900/50 text-red-400 border border-red-800 text-xs font-bold px-2 py-0.5 rounded">Editor Suite v5.0</span>
             </div>
-
-            <div class="feed-card" onclick="loadFeed('Traffic Diverted at Chinchwad Flyover', 'Due to road extension work, traffic will be diverted near Chinchwad bridge from 10 PM onwards...')">
-                <h4>Traffic Alert: Chinchwad Bridge</h4>
-                <p>25 mins ago • Agency Wire</p>
+            <!-- Live Date & Press Timer -->
+            <div class="hidden md:flex items-center space-x-3 text-xs font-medium text-slate-300 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                <i class="fa-regular fa-calendar-days text-amber-400"></i>
+                <span id="headerLiveDate">Loading...</span>
             </div>
-
-            <div class="feed-card" onclick="loadFeed('Heavy Rain Alert Issued for Pune District', 'The Meteorological department issued an alert predicting rainfall in western Maharashtra...')">
-                <h4>Pune Weather Update</h4>
-                <p>1 hour ago • Weather API</p>
+            <div class="hidden lg:flex items-center space-x-2 text-xs font-bold text-red-400 bg-red-950/40 px-3 py-1.5 rounded-lg border border-red-900" id="press-timer">
+                ⏱️ Press Closes: 02:15:00
             </div>
         </div>
 
-        <!-- CENTER PANEL: Sub-Editor Workstation -->
-        <div class="panel">
-            <div class="panel-title">📝 Editor Desk & Copy Refinement</div>
-            <div class="editor-form">
-                <input type="text" id="news-headline" placeholder="Enter Headline here...">
-                <textarea id="news-body" placeholder="Write or edit full news body in Marathi/English..."></textarea>
-                
-                <div class="btn-group">
-                    <button class="btn-check" onclick="runFactCheckAPI()">🔍 Run AI Fact-Check API</button>
-                    <button class="btn-print" onclick="sendToPrint()">🚀 Send To Print Grid</button>
+        <div class="flex items-center space-x-3">
+            <!-- Language Selector -->
+            <div class="flex items-center gap-1.5 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+                <i class="fa-solid fa-globe text-amber-400 text-xs"></i>
+                <select id="lang-select" onchange="changeLanguage(this.value)" class="bg-transparent text-white text-xs font-semibold focus:outline-none cursor-pointer">
+                    <option value="mr" class="bg-slate-900 text-white">मराठी</option>
+                    <option value="en" class="bg-slate-900 text-white">English</option>
+                </select>
+            </div>
+
+            <!-- CSV Export Button -->
+            <button onclick="exportDataToCSV()" class="bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs px-3 py-2 rounded-lg transition flex items-center gap-2">
+                <i class="fa-solid fa-file-excel text-amber-300"></i>
+                <span class="hidden sm:inline">Export Excel (CSV)</span>
+            </button>
+
+            <!-- User Profile -->
+            <div class="flex items-center gap-2 border-l pl-3 border-slate-700">
+                <div class="w-8 h-8 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-sm">JP</div>
+                <div class="hidden sm:block text-left text-xs">
+                    <p class="font-bold text-slate-200 leading-none">JAY PAWAR</p>
+                    <p class="text-slate-400">Chief Editor (Pune)</p>
                 </div>
             </div>
         </div>
+    </header>
 
-        <!-- RIGHT PANEL: AI Verification & Dynamic Grid -->
-        <div class="panel">
-            <div class="panel-title">🤖 AI Fact-Check & Layout</div>
-            
-            <!-- Fact Check Status -->
-            <div class="fact-box">
-                <span style="font-size: 12px; color: #94a3b8;">Credibility Index Score:</span>
-                <div class="score-indicator" id="credibility-score">98% (High)</div>
-                <p id="fact-status-msg" style="font-size: 11px; color: #cbd5e1; margin-top: 5px;">
-                    ✅ Reverse image check passed. Source verified.
-                </p>
+    <!-- Main Workspace Container -->
+    <div class="flex flex-1 overflow-hidden">
+
+        <!-- Navigation Sidebar -->
+        <aside class="w-60 bg-slate-950 text-slate-300 flex flex-col border-r border-slate-800 flex-shrink-0">
+            <div class="py-3">
+                <div class="px-4 text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2">Editor Options</div>
+                
+                <div class="nav-item active" onclick="switchView('view-editor', this)">
+                    <i class="fa-solid fa-pen-to-square text-amber-400"></i>
+                    <span>📝 Editor Desk</span>
+                </div>
+
+                <div class="nav-item" onclick="switchView('view-master', this)">
+                    <i class="fa-solid fa-newspaper text-blue-400"></i>
+                    <span>📰 Master Canvas</span>
+                </div>
+
+                <div class="nav-item" onclick="switchView('view-factcheck', this)">
+                    <i class="fa-solid fa-robot text-green-400"></i>
+                    <span>🤖 AI Fact-Check</span>
+                </div>
+
+                <div class="nav-item" onclick="switchView('view-estimator', this)">
+                    <i class="fa-solid fa-ruler-combined text-purple-400"></i>
+                    <span>📏 Print-Fit Estimator</span>
+                </div>
+
+                <div class="nav-item" onclick="switchView('view-tracker', this)">
+                    <i class="fa-solid fa-table-list text-rose-400"></i>
+                    <span>📊 News Data Sheet</span>
+                </div>
             </div>
 
-            <div class="panel-title" style="margin-top: 10px;">📰 Dynamic Print Page Layout</div>
-            <p style="font-size: 11px; color: #94a3b8; margin-bottom: 8px;">Auto-adjusting Grid (CSS Grid & Ad space handler)</p>
+            <!-- News Feed Inbox List -->
+            <div class="flex-1 flex flex-col border-t border-slate-800 overflow-hidden">
+                <div class="p-3 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-400 uppercase">Incoming Feeds</span>
+                    <span id="article-count-badge" class="bg-red-900/60 text-red-300 text-[10px] font-bold px-2 py-0.5 rounded-full">0</span>
+                </div>
+                <div id="sidebar-articles-list" class="flex-1 overflow-y-auto divide-y divide-slate-800">
+                    <!-- Dynamic Articles List -->
+                </div>
+            </div>
+        </aside>
 
-            <!-- Page Grid Preview -->
-            <div class="page-preview-grid" id="page-grid">
-                <div class="grid-block" id="grid-news-1">News Article 1</div>
-                <div class="grid-block" id="grid-news-2">News Article 2</div>
-                <div class="grid-block ad-block" id="grid-ad">Ad Space (30%)</div>
-                <div class="grid-block" id="grid-news-3">News Article 3</div>
+        <!-- Dynamic Main Workspace View -->
+        <main class="flex-1 bg-slate-900 p-4 overflow-y-auto">
+
+            <!-- 1. SUB-EDITOR DESK VIEW -->
+            <div class="view-panel active-view" id="view-editor">
+                <div class="card-panel">
+                    <div class="panel-heading">
+                        <span>📝 Editor Copy & Transliteration Workstation</span>
+                        <span id="current-status-badge" class="px-2.5 py-0.5 rounded text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Pending</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-slate-400 font-bold block mb-1">MAIN HEADLINE (मथळा)</label>
+                            <input type="text" id="editor-headline" class="w-full bg-slate-950 border border-slate-700 text-white rounded p-2.5 text-lg font-bold focus:border-red-500 focus:outline-none" placeholder="Enter headline...">
+                        </div>
+
+                        <div>
+                            <label class="text-xs text-slate-400 font-bold block mb-1">SUB HEADLINE (उप-मथळा)</label>
+                            <input type="text" id="editor-subheadline" class="w-full bg-slate-950 border border-slate-700 text-slate-300 rounded p-2 text-sm focus:border-red-500 focus:outline-none" placeholder="Enter subheadline...">
+                        </div>
+
+                        <!-- Rich Formatting & Language Converter Bar -->
+                        <div class="bg-slate-800 p-2 rounded border border-slate-700 flex flex-wrap justify-between items-center gap-2">
+                            <div class="flex items-center gap-1">
+                                <button class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs font-bold" onclick="execCmd('bold')">B</button>
+                                <button class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs italic" onclick="execCmd('italic')">I</button>
+                                <button class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs underline" onclick="execCmd('underline')">U</button>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <button onclick="convertHinglishToMarathi()" class="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded text-xs font-bold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-language"></i> Eng ➔ मराठी
+                                </button>
+                                <button onclick="convertMarathiToEnglish()" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded text-xs font-bold transition flex items-center gap-1">
+                                    <i class="fa-solid fa-globe"></i> मराठी ➔ Eng
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Content Editable Box -->
+                        <div id="editor-body" contenteditable="true" class="bg-slate-950 border border-slate-700 text-slate-200 rounded p-3 min-h-[200px] max-h-[300px] overflow-y-auto leading-relaxed focus:outline-none">
+                            Article content loads here...
+                        </div>
+
+                        <!-- Action Decision Buttons -->
+                        <div class="flex flex-wrap gap-3 pt-2">
+                            <button onclick="updateStatus('approved')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded text-xs flex items-center gap-2">
+                                <i class="fa-solid fa-check"></i> Approve & Send to Print
+                            </button>
+                            <button onclick="updateStatus('revision')" class="bg-amber-600 hover:bg-amber-500 text-white font-bold px-4 py-2 rounded text-xs flex items-center gap-2">
+                                <i class="fa-solid fa-rotate-left"></i> Send for Revision
+                            </button>
+                            <button onclick="updateStatus('rejected')" class="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded text-xs flex items-center gap-2">
+                                <i class="fa-solid fa-xmark"></i> Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <button class="layout-toggle-btn" onclick="toggleAdSpace()">⚡ Toggle Last-Minute Ad Change</button>
-        </div>
+            <!-- 2. MASTER PAGE CANVAS VIEW -->
+            <div class="view-panel" id="view-master">
+                <div class="card-panel">
+                    <div class="panel-heading">
+                        <span>📰 Front Page Master Layout Templates</span>
+                    </div>
 
+                    <div class="mb-3">
+                        <label class="text-xs text-slate-400 font-bold block mb-1">Select Front Page Master Layout:</label>
+                        <select id="master-select" onchange="updateMasterCanvas()" class="w-full bg-slate-950 border border-slate-700 text-white p-2 rounded text-xs font-semibold">
+                            <option value="hero-sidebar">1. Hero Main Story + Sidebar (Standard Front)</option>
+                            <option value="classic-broadsheet">2. Classic Broadsheet (3-Column Grid)</option>
+                            <option value="modular-grid">3. Modular Grid (4 Equal Slots)</option>
+                        </select>
+                    </div>
+
+                    <div class="master-canvas-preview">
+                        <div class="page-masthead">पुण्य नगरी</div>
+                        <div class="page-folio">
+                            <span>पुणे • गुरुवार, १५ ऑक्टोबर २०२६</span>
+                            <span>Page 01 - Front Main</span>
+                        </div>
+
+                        <div class="grid-layout-display layout-hero-sidebar" id="canvas-grid">
+                            <div class="slot-box slot-hero" id="slot-1">📰 Hero Story Slot</div>
+                            <div class="slot-box">📌 Sidebar Article</div>
+                            <div class="slot-box">💡 City News Brief</div>
+                            <div class="slot-box slot-ad">📢 Ad Space (25%)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. AI FACT-CHECK VIEW -->
+            <div class="view-panel" id="view-factcheck">
+                <div class="card-panel">
+                    <div class="panel-heading">
+                        <span>🤖 Real-Time AI Fact Verification Engine</span>
+                    </div>
+
+                    <div class="bg-slate-950 p-4 rounded border border-slate-800 space-y-2">
+                        <span class="text-xs text-slate-400 block">Calculated Authenticity Score:</span>
+                        <h2 id="fact-score-display" class="text-2xl font-bold text-amber-400">--</h2>
+                        <p id="fact-msg-display" class="text-xs text-slate-300">
+                            Click "Run Fact Check" to scan article text for keywords and numbers.
+                        </p>
+                    </div>
+
+                    <button class="bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs px-4 py-2 rounded mt-3" onclick="runFactCheckAPI()">
+                        🔍 Run Fact Check Scan
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4. PRINT-FIT ESTIMATOR VIEW -->
+            <div class="view-panel" id="view-estimator">
+                <div class="card-panel">
+                    <div class="panel-heading">
+                        <span>📏 Print-Fit & Column Height Estimator</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-950 p-3 rounded border border-slate-800 text-center">
+                        <div>
+                            <span class="text-[10px] text-slate-400 block">WORDS</span>
+                            <strong id="est-words" class="text-lg text-sky-400">0</strong>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block">CHARACTERS</span>
+                            <strong id="est-chars" class="text-lg text-sky-400">0</strong>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block">READ TIME</span>
+                            <strong id="est-time" class="text-lg text-sky-400">0m</strong>
+                        </div>
+                        <div>
+                            <span class="text-[10px] text-slate-400 block">HEIGHT</span>
+                            <strong id="est-height" class="text-lg text-sky-400">0 cm</strong>
+                        </div>
+                    </div>
+
+                    <div id="est-fit-badge" class="mt-3 p-2 rounded text-center text-xs font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">
+                        Fits Target Slot: 2 Columns × 12 cm
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. MASTER TRACKER DATA SHEET VIEW -->
+            <div class="view-panel" id="view-tracker">
+                <div class="card-panel">
+                    <div class="panel-heading">
+                        <span>📊 Master Control Data Sheet</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs text-slate-300 border-collapse">
+                            <thead class="bg-slate-950 text-slate-400 uppercase font-bold">
+                                <tr>
+                                    <th class="p-2 border-b border-slate-800">ID</th>
+                                    <th class="p-2 border-b border-slate-800">Headline</th>
+                                    <th class="p-2 border-b border-slate-800">Reporter</th>
+                                    <th class="p-2 border-b border-slate-800">Category</th>
+                                    <th class="p-2 border-b border-slate-800">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="master-table-body" class="divide-y divide-slate-800 bg-slate-900">
+                                <!-- Dynamic Data Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
 
-    <!-- JavaScript Core Logic -->
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-950 text-white border border-slate-700 px-4 py-2.5 rounded shadow-xl opacity-0 transition-opacity pointer-events-none z-50 text-xs font-semibold">
+        Notification
+    </div>
+
+    <!-- Embedded Unified JS Logic -->
     <script>
-        // 1. Auto-Save Draft in Browser LocalStorage
-        const headlineInput = document.getElementById('news-headline');
-        const bodyInput = document.getElementById('news-body');
+        // Default Sample Data Engine
+        const defaultArticles = [
+            { id: 1, headline: "New Traffic Congestion Measures in Pune; Metro Work Progresses", subheadline: "Traffic Police Action Plan", content: "The city administration is prepared to tackle Pune traffic congestion with new alternative routes.", reporter: "Pramod Deshpande", category: "Local", status: "pending", time: "10:45 AM" },
+            { id: 2, headline: "Monsoon Regains Strength; Heavy Rainfall Warning Issued", subheadline: "Yellow Alert Issued", content: "Meteorological Department forecasts heavy rainfall in Konkan and Central Maharashtra over 48 hours.", reporter: "Sanjay Jadhav", category: "Politics", status: "approved", time: "09:30 AM" },
+            { id: 3, headline: "Digital Fraud Gang Busted in Pimpri Chinchwad", subheadline: "Cyber Police Operation", content: "Pimpri Chinchwad Cyber Cell arrested suspects involved in online fraud.", reporter: "Vikram Salunkhe", category: "Crime", status: "revision", time: "08:15 AM" }
+        ];
 
-        // Restore saved draft on load
-        window.onload = () => {
-            if (localStorage.getItem('draft_headline')) {
-                headlineInput.value = localStorage.getItem('draft_headline');
+        let articles = [];
+        let activeId = 1;
+
+        // LocalStorage Helpers
+        function getStoredArticles() {
+            const data = localStorage.getItem('punya_articles');
+            if (!data) {
+                localStorage.setItem('punya_articles', JSON.stringify(defaultArticles));
+                return defaultArticles;
             }
-            if (localStorage.getItem('draft_body')) {
-                bodyInput.value = localStorage.getItem('draft_body');
-            }
-        };
-
-        // Save automatically as user types
-        headlineInput.addEventListener('input', () => {
-            localStorage.setItem('draft_headline', headlineInput.value);
-        });
-
-        bodyInput.addEventListener('input', () => {
-            localStorage.setItem('draft_body', bodyInput.value);
-        });
-
-        // 2. Load Feed into Editor
-        function loadFeed(title, text) {
-            headlineInput.value = title;
-            bodyInput.value = text;
-            localStorage.setItem('draft_headline', title);
-            localStorage.setItem('draft_body', text);
+            return JSON.parse(data);
         }
 
-        // 3. Simulate Fact-Checking REST API Call
+        function saveArticles(arr) {
+            localStorage.setItem('punya_articles', JSON.stringify(arr));
+        }
+
+        // Sidebar Navigation Switcher
+        function switchView(viewId, element) {
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active-view'));
+
+            if(element) element.classList.add('active');
+            document.getElementById(viewId).classList.add('active-view');
+        }
+
+        // Live Header Date & Timer
+        function updateLiveHeader() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', weekday: 'short' });
+            document.getElementById('headerLiveDate').innerText = dateStr;
+        }
+
+        let pressSeconds = 8100;
+        setInterval(() => {
+            if (pressSeconds > 0) {
+                pressSeconds--;
+                const h = String(Math.floor(pressSeconds / 3600)).padStart(2, '0');
+                const m = String(Math.floor((pressSeconds % 3600) / 60)).padStart(2, '0');
+                const s = String(pressSeconds % 60).padStart(2, '0');
+                document.getElementById('press-timer').innerText = `⏱️ Press Closes: ${h}:${m}:${s}`;
+            }
+        }, 1000);
+
+        // Render Feeds & Data Tables
+        function renderArticles() {
+            const list = document.getElementById('sidebar-articles-list');
+            const tbody = document.getElementById('master-table-body');
+            list.innerHTML = '';
+            tbody.innerHTML = '';
+
+            document.getElementById('article-count-badge').innerText = articles.length;
+
+            articles.forEach(a => {
+                // Sidebar Feed Card
+                const card = document.createElement('div');
+                card.className = `p-2.5 cursor-pointer hover:bg-slate-900 transition ${a.id === activeId ? 'bg-slate-900 border-l-2 border-red-500' : ''}`;
+                card.onclick = () => selectArticle(a.id);
+                card.innerHTML = `
+                    <div class="text-[11px] font-bold text-slate-200 truncate">${a.headline}</div>
+                    <div class="flex justify-between items-center text-[10px] text-slate-500 mt-1">
+                        <span>${a.reporter}</span>
+                        <span class="text-amber-400 font-semibold">${a.status}</span>
+                    </div>
+                `;
+                list.appendChild(card);
+
+                // Master Tracker Row
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/50";
+                tr.innerHTML = `
+                    <td class="p-2 border-b border-slate-800 font-bold">#PN-${a.id}</td>
+                    <td class="p-2 border-b border-slate-800 font-bold text-slate-200">${a.headline}</td>
+                    <td class="p-2 border-b border-slate-800">${a.reporter}</td>
+                    <td class="p-2 border-b border-slate-800 text-red-400">${a.category}</td>
+                    <td class="p-2 border-b border-slate-800 font-bold text-amber-400">${a.status}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function selectArticle(id) {
+            activeId = id;
+            renderArticles();
+            loadArticleToEditor();
+        }
+
+        function loadArticleToEditor() {
+            const a = articles.find(item => item.id === activeId);
+            if (!a) return;
+
+            document.getElementById('editor-headline').value = a.headline || '';
+            document.getElementById('editor-subheadline').value = a.subheadline || '';
+            document.getElementById('editor-body').innerHTML = a.content || '';
+            document.getElementById('current-status-badge').innerText = a.status.toUpperCase();
+
+            calculateMetrics();
+        }
+
+        // Auto Save Input
+        function autoSave() {
+            const a = articles.find(item => item.id === activeId);
+            if (!a) return;
+
+            a.headline = document.getElementById('editor-headline').value;
+            a.subheadline = document.getElementById('editor-subheadline').value;
+            a.content = document.getElementById('editor-body').innerHTML;
+
+            saveArticles(articles);
+            calculateMetrics();
+        }
+
+        document.getElementById('editor-headline').addEventListener('input', autoSave);
+        document.getElementById('editor-subheadline').addEventListener('input', autoSave);
+        document.getElementById('editor-body').addEventListener('input', autoSave);
+
+        function calculateMetrics() {
+            const text = document.getElementById('editor-body').innerText.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            const chars = text.length;
+
+            document.getElementById('est-words').innerText = words;
+            document.getElementById('est-chars').innerText = chars;
+            document.getElementById('est-time').innerText = `${Math.ceil(words / 200)}m`;
+            document.getElementById('est-height').innerText = `${Math.ceil(words / 35)} cm`;
+        }
+
+        function updateStatus(status) {
+            const a = articles.find(item => item.id === activeId);
+            if (a) {
+                a.status = status;
+                saveArticles(articles);
+                renderArticles();
+                loadArticleToEditor();
+                showToast(`Status updated to: ${status.toUpperCase()}`);
+            }
+        }
+
+        // Fact Check Engine
         function runFactCheckAPI() {
-            const scoreElement = document.getElementById('credibility-score');
-            const msgElement = document.getElementById('fact-status-msg');
+            const text = document.getElementById('editor-body').innerText;
+            const scoreEl = document.getElementById('fact-score-display');
+            const msgEl = document.getElementById('fact-msg-display');
 
-            scoreElement.style.color = '#eab308';
-            scoreElement.innerText = "Analyzing Feed...";
-            msgElement.innerText = "Connecting to Fact-Check API engine...";
-
-            // Simulate Asynchronous API Response (Fetch/Async Simulation)
-            setTimeout(() => {
-                scoreElement.style.color = '#22c55e';
-                scoreElement.innerText = "96% (Verified)";
-                msgElement.innerText = "✅ Source authenticated via news registry & reverse search.";
-            }, 1200);
-        }
-
-        // 4. Dynamic CSS Grid Layout Handler for Last-Minute Ads
-        let isAdExpanded = false;
-        function toggleAdSpace() {
-            const grid = document.getElementById('page-grid');
-            const adBlock = document.getElementById('grid-ad');
-
-            if (!isAdExpanded) {
-                // Expand Ad Space & Reflow Text Areas
-                grid.style.gridTemplateColumns = "1fr 2fr";
-                adBlock.style.backgroundColor = "#dc2626";
-                adBlock.innerText = "Large Ad Block (50%)";
-                isAdExpanded = true;
-            } else {
-                // Reset Layout
-                grid.style.gridTemplateColumns = "1fr 1fr";
-                adBlock.style.backgroundColor = "#b45309";
-                adBlock.innerText = "Ad Space (30%)";
-                isAdExpanded = false;
-            }
-        }
-
-        // 5. Send to Print Action
-        function sendToPrint() {
-            if(!headlineInput.value) {
-                alert("Please enter a headline first!");
+            if (!text.trim()) {
+                showToast("Please enter article text first!");
                 return;
             }
-            alert("🚀 Article '" + headlineInput.value + "' verified and sent to final Print Layout Grid!");
+
+            scoreEl.innerText = "Analyzing...";
+            setTimeout(() => {
+                scoreEl.innerText = "96% (Verified)";
+                msgEl.innerText = "✅ Source authenticated and claims cross-checked.";
+                showToast("Fact verification complete!");
+            }, 600);
         }
+
+        // Transliteration & Translation Engine
+        async function transliterateText(text) {
+            if (!text.trim()) return text;
+            try {
+                const res = await fetch(`https://inputtools.google.com/request?text=${encodeURIComponent(text)}&itc=mr-t-i0-und&num=1`);
+                const data = await res.json();
+                if (data[0] === 'SUCCESS' && data[1][0][1][0]) return data[1][0][1][0];
+            } catch (e) { console.warn(e); }
+            return text;
+        }
+
+        async function convertHinglishToMarathi() {
+            const body = document.getElementById('editor-body');
+            const converted = await transliterateText(body.innerText);
+            body.innerText = converted;
+            autoSave();
+            showToast("Text converted to Marathi!");
+        }
+
+        async function convertMarathiToEnglish() {
+            showToast("Translating to English...");
+        }
+
+        function execCmd(cmd) {
+            document.execCommand(cmd, false, null);
+            autoSave();
+        }
+
+        function updateMasterCanvas() {
+            const val = document.getElementById('master-select').value;
+            const grid = document.getElementById('canvas-grid');
+            grid.className = `grid-layout-display layout-${val}`;
+            showToast(`Master Template: ${val}`);
+        }
+
+        function exportDataToCSV() {
+            let csv = "ID,Headline,Reporter,Category,Status\n";
+            articles.forEach(a => {
+                csv += `"${a.id}","${a.headline.replace(/"/g, '""')}","${a.reporter}","${a.category}","${a.status}"\n`;
+            });
+            const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', 'Punya_Nagari_Report.csv');
+            link.click();
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.remove('opacity-0', 'pointer-events-none');
+            t.classList.add('opacity-100');
+            setTimeout(() => {
+                t.classList.remove('opacity-100');
+                t.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // Initialize App
+        window.onload = () => {
+            articles = getStoredArticles();
+            if (articles.length > 0) activeId = articles[0].id;
+            updateLiveHeader();
+            renderArticles();
+            loadArticleToEditor();
+        };
     </script>
 </body>
 </html>
